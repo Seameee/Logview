@@ -1,6 +1,6 @@
 services:
-  tail-web:
-    build: .
+  logview:
+    image: ghcr.io/Seameee/logview:latest
     container_name: fakessh-tail
     ports:
       - "127.0.0.1:7681:7681"

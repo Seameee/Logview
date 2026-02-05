@@ -1,9 +1,9 @@
 #!/bin/sh
 
 # 环境变量
-ANONYMIZE_MODE=${ANONYMIZE_MODE:-partial}
-FILTER_WORDS=${FILTER_WORDS:-}
-LOG_FILE=${LOG_FILE:-/var/log/0.log}
+ANONYMIZE_MODE=${ANONYMIZE_MODE}
+FILTER_WORDS=${FILTER_WORDS}
+LOG_FILE=${LOG_FILE}
 
 # 构建关键词过滤规则
 KEYWORD_SED=""
@@ -47,6 +47,6 @@ exec ttyd \
   --port 7681 \
   --ping-interval 30 \
   --max-clients 500 \
-  -d "${LWS_LOG_LEVEL:-0}" \
+  -d "${LWS_LOG_LEVEL}" \
   -T screen-256color \
   tmux attach -t logview -r
