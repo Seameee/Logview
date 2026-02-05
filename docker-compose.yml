@@ -1,15 +1,15 @@
 services:
   logview:
-    image: ghcr.io/Seameee/logview:latest
-    container_name: fakessh-tail
+    image: ghcr.io/seameee/logview:latest
+    container_name: logview
     ports:
       - "127.0.0.1:7681:7681"
     volumes:
-      - /var/log/fakessh.log:/var/log/0.log:ro
+      - /path/to/logfile:/var/log/0.log:ro
     environment:
       - ANONYMIZE_MODE=partial
-      - FILTER_WORDS=LeasewebSG
-      - LWS_LOG_LEVEL=1
+      - FILTER_WORDS=keyword1 keyword2
+      - LWS_LOG_LEVEL=7
     read_only: true
     tmpfs:
       - /tmp:noexec,nosuid,size=100m

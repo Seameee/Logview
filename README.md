@@ -39,10 +39,15 @@
 ```bash
 docker run -d \
   --name logview \
-  -p 7681:7681 \
+  -p 127.0.0.1:7681:7681 \
   -v /path/to/logfile:/var/log/0.log:ro \
   -e ANONYMIZE_MODE=partial \
   -e FILTER_WORDS=keyword1 keyword2 \
+  -e LWS_LOG_LEVEL=7 \
+  --read-only \
+  --tmpfs /tmp:noexec,nosuid,size=100m \
+  --security-opt no-new-privileges:true \
+  --cap-drop ALL \
   ghcr.io/Seameee/logview:latest
 ```
 
@@ -68,7 +73,14 @@ services:
     environment:
       - ANONYMIZE_MODE=partial
       - FILTER_WORDS=keyword1 keyword2
-      - LWS_LOG_LEVEL=1
+      - LWS_LOG_LEVEL=7
+    read_only: true
+    tmpfs:
+      - /tmp:noexec,nosuid,size=100m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     restart: unless-stopped
 ```
 
@@ -87,9 +99,13 @@ http://localhost:7681
 ```bash
 docker run -d \
   --name logview \
-  -p 7681:7681 \
+  -p 127.0.0.1:7681:7681 \
   -v /var/log/auth.log:/var/log/0.log:ro \
   -e ANONYMIZE_MODE=full \
+  --read-only \
+  --tmpfs /tmp:noexec,nosuid,size=100m \
+  --security-opt no-new-privileges:true \
+  --cap-drop ALL \
   ghcr.io/Seameee/logview:latest
 ```
 
@@ -98,10 +114,14 @@ docker run -d \
 ```bash
 docker run -d \
   --name logview \
-  -p 7681:7681 \
+  -p 127.0.0.1:7681:7681 \
   -v /var/log/app.log:/var/log/0.log:ro \
   -e ANONYMIZE_MODE=partial \
   -e FILTER_WORDS=password token secret api_key \
+  --read-only \
+  --tmpfs /tmp:noexec,nosuid,size=100m \
+  --security-opt no-new-privileges:true \
+  --cap-drop ALL \
   ghcr.io/Seameee/logview:latest
 ```
 
@@ -110,9 +130,13 @@ docker run -d \
 ```bash
 docker run -d \
   --name logview \
-  -p 7681:7681 \
+  -p 127.0.0.1:7681:7681 \
   -v /var/log/access.log:/var/log/0.log:ro \
   -e ANONYMIZE_MODE=hash \
+  --read-only \
+  --tmpfs /tmp:noexec,nosuid,size=100m \
+  --security-opt no-new-privileges:true \
+  --cap-drop ALL \
   ghcr.io/Seameee/logview:latest
 ```
 
