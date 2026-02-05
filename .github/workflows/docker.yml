@@ -2,11 +2,11 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
     tags:
       - 'v*.*.*'
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
 
 permissions:
   contents: read
@@ -46,6 +46,7 @@ jobs:
             type=semver,pattern={{major}}
             type=sha
             type=raw,value=latest,enable={{is_default_branch}}
+            type=platform
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5

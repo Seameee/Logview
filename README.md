@@ -48,7 +48,7 @@ docker run -d \
   --tmpfs /tmp:noexec,nosuid,size=100m \
   --security-opt no-new-privileges:true \
   --cap-drop ALL \
-  ghcr.io/Seameee/logview:latest
+  ghcr.io/seameee/logview:latest
 ```
 
 ### 使用 Docker Compose
@@ -64,7 +64,7 @@ docker-compose up -d
 ```yaml
 services:
   logview:
-    image: ghcr.io/Seameee/logview:latest
+    image: ghcr.io/seameee/logview:latest
     container_name: logview
     ports:
       - "127.0.0.1:7681:7681"
@@ -106,7 +106,7 @@ docker run -d \
   --tmpfs /tmp:noexec,nosuid,size=100m \
   --security-opt no-new-privileges:true \
   --cap-drop ALL \
-  ghcr.io/Seameee/logview:latest
+  ghcr.io/seameee/logview:latest
 ```
 
 ### 示例 2：过滤敏感关键词
@@ -122,7 +122,7 @@ docker run -d \
   --tmpfs /tmp:noexec,nosuid,size=100m \
   --security-opt no-new-privileges:true \
   --cap-drop ALL \
-  ghcr.io/Seameee/logview:latest
+  ghcr.io/seameee/logview:latest
 ```
 
 ### 示例 3：哈希模式
@@ -137,7 +137,7 @@ docker run -d \
   --tmpfs /tmp:noexec,nosuid,size=100m \
   --security-opt no-new-privileges:true \
   --cap-drop ALL \
-  ghcr.io/Seameee/logview:latest
+  ghcr.io/seameee/logview:latest
 ```
 
 ## 安全建议
