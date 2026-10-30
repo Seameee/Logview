@@ -1,20 +1,85 @@
+# Logview 部署示例。
+#
+# 三个前提：
+#   * 只读专用日志目录（不要挂单个文件，原因见下）
+#   * 非 root UID/GID + 只读根文件系统 + 全部能力丢弃
+#   * 端口只绑宿主 loopback，对外由反向代理提供 TLS
+#
+# ---------------------------------------------------------------------------
+# 为什么挂目录而不是挂单个文件
+# ---------------------------------------------------------------------------
+# 旧示例是 `- /path/to/logfile:/var/log/0.log:ro`。单文件 bind mount 绑定容器启动
+# 那一刻的 inode；fakessh / logrotate 把 0.log rename 成 0.log.1 再新建 0.log 之后，
+# 容器内看到的仍是被改名（甚至已删除）的旧 inode，页面会一直停在旧内容。
+# 这是挂载语义的限制，应用无法绕过。
+#
+# 正确做法是挂目录，并让应用跟随目录里的固定文件名：
+#   - /path/to/logdir:/var/log:ro
+#   - LOG_FILE=/var/log/0.log
+# 应用用「路径 + 打开后的文件身份」比较前后两次 stat，识别 rename/create 与
+# copytruncate 两种轮转。代价是容器能读到该目录下的所有文件，因此务必使用只含
+# 日志的专用目录，不要把 /var/log 整个挂进来。
+#
+# 注意：即使挂了目录，如果轮转配置把文件从目录里 mv 走，应用仍会短暂看到
+# 「文件缺失」并等待重建。这属于可恢复状态，进程没有故障。
+
 services:
   logview:
     image: ghcr.io/seameee/logview:latest
     container_name: logview
+    restart: unless-stopped
+
+    # 只监听宿主 loopback；对外暴露交给反向代理（TLS + 访问控制）。
     ports:
       - "127.0.0.1:7681:7681"
+
     volumes:
-      - /path/to/logfile:/var/log/0.log:ro
+      # 只读专用目录：目录里应当只有日志文件本身。
+      - /path/to/logdir:/var/log:ro
+
     environment:
-      - ANONYMIZE_MODE=partial
-      - FILTER_WORDS=keyword1 keyword2
-      - LWS_LOG_LEVEL=7
+      LOG_FILE: /var/log/0.log
+      # partial | full | hash；默认 partial。
+      ANONYMIZE_MODE: partial
+      # auto | plain | fakessh；默认 auto。
+      LOG_FORMAT: auto
+      # 关键词必须整体加引号，否则会被拆成多个环境变量（旧 README 在这点上写错了）。
+      # 区分大小写的字面匹配，命中后替换为固定的 [filtered]。
+      FILTER_WORDS: "keyword1 keyword2"
+      # 详情默认不公开。改成 true 会把「版本/正文」等字段放进 HTTP 与 SSE。
+      # 它只是进程级开关，不构成浏览器端权限控制：任何能访问该端口的人都能看到。
+      EXPOSE_LOG_DETAILS: "false"
+      # 日志时间没有时区信息时按此解释，并在页面上标注该假设。
+      LOG_TIMEZONE: UTC
+      # SSE 并发上限，1..1024，默认 64。
+      MAX_SSE_CLIENTS: "64"
+      # LWS_LOG_LEVEL 已弃用：仍可传入但只在 stderr 提示一次，然后被忽略。
+
     read_only: true
     tmpfs:
-      - /tmp:noexec,nosuid,size=100m
+      - /tmp:noexec,nosuid,size=16m
+
     security_opt:
       - no-new-privileges:true
     cap_drop:
       - ALL
-    restart: unless-stopped
+
+    # 与 Dockerfile 里的 USER 一致；这里显式写出来便于宿主侧按 GID 授权。
+    user: "10001:10001"
+
+    # 如果日志文件的属组不是 10001（例如 rsyslog 写出的 `syslog:adm 640`），
+    # 请把宿主那个组的 GID 追加给容器进程，不要放宽文件权限：
+    #   group_add:
+    #     - "4"      # 宿主的 adm 组，用 `getent group adm` 确认
+    # 更干净的做法是 `chgrp 10001` 让日志属组直接匹配，见 README。
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    # 资源上限，防止异常输入或慢客户端拖垮宿主。
+    mem_limit: 256m
+    pids_limit: 128
+    cpu_shares: 512

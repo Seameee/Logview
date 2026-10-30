@@ -1,0 +1,43 @@
+# 生成目录与本地产物，不提交。
+
+# 前端依赖与构建产物
+web/node_modules/
+web/dist/
+web/.vite/
+web/**/*.tsbuildinfo
+web/npm-debug.log*
+web/yarn-error.log*
+npm-debug.log*
+
+# Go 内嵌的前端产物（只保留占位文件）
+internal/server/dist/*
+!internal/server/dist/.gitkeep
+
+# Go 构建与测试产物
+/logview
+/dist/
+*.test
+*.out
+coverage.*
+
+# 本地配置与密钥：容器编排、环境变量、证书都不要进库
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# 编辑器与系统杂项
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# AI 工作指南：本地规格文档，含部署环境信息，不对外发布
+AGENTS.MD
+AGENTS.md

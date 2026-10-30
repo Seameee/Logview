@@ -1,0 +1,37 @@
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: dark --default, light;
+}
+
+/* 日志正文等宽字体栈：优先本机等宽字体，避免引入外部字体文件（CSP 只允许 self）。 */
+@theme {
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    monospace;
+}
+
+/* daisyUI 5 默认给按钮/徽章叠加一层噪点纹理，实现方式是内联 data: URL 的 SVG。
+   服务的 CSP 是 img-src 'self'，data: 会被拦下并在控制台刷出大量违规报告。
+   这里关掉该装饰变量：视觉损失可以忽略，换来不需要为它放宽 CSP。 */
+:root,
+[data-theme] {
+  --fx-noise: none;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overscroll-behavior: none;
+}
+
+/* 日志行必须保留空白与换行，但长单词要能在 375px 下折行而不是横向溢出。 */
+.log-line {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
